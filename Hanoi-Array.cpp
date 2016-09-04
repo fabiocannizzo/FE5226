@@ -12,31 +12,31 @@ using namespace std;
 
 const unsigned nMaxDiscs = 100;
 
-struct Pole
+class Tower
 {
-    Pole(char id) : m_poleId(id), m_size(0) {}
+    char     m_towerId;           // tower identifier
+    unsigned m_size;             // number of non-empty slots
+    unsigned m_slots[nMaxDiscs]; // slots for discs
 
-    // push a disc at the top of the pole
+public:
+    Tower(char id) : m_towerId(id), m_size(0) {}
+
+    // push a disc at the top of the tower
     void push(unsigned discId)
     {
         m_slots[m_size++] = discId;
     }
 
-    // pop a disc from the top of the pole
+    // pop a disc from the top of the tower
     unsigned pop()
     {
         return m_slots[--m_size];
     }
 
-    char name() const { return m_poleId; }
-
-private:
-    char     m_poleId;           // pole identifier
-    unsigned m_size;             // number of non-empty slots
-    unsigned m_slots[nMaxDiscs]; // slots for discs
+    char name() const { return m_towerId; }
 };
 
-void move(unsigned nDiscs, Pole& p1, Pole& p2, Pole& p3, unsigned& nMoves)
+void move(unsigned nDiscs, Tower& p1, Tower& p2, Tower& p3, unsigned& nMoves)
 {
     if (nDiscs > 1) {
         // recursion
@@ -57,17 +57,17 @@ void move(unsigned nDiscs, Pole& p1, Pole& p2, Pole& p3, unsigned& nMoves)
 
 int main()
 {
-    Pole p1('a');
-    Pole p2('b');
-    Pole p3('c');
+    Tower p1('a');
+    Tower p2('b');
+    Tower p3('c');
 
     const unsigned nDiscs = 4;
 
-    // initialize, all discs on pole1
+    // initialize, all discs on tower1
     for (unsigned i = 0; i < nDiscs; ++i)
         p1.push(nDiscs-i);
 
-    // move nDiscs discs from pole1 to pole2 using pole3
+    // move nDiscs discs from tower1 to tower2 using tower3
     unsigned nMoves = 0;
     move(nDiscs, p1, p2, p3, nMoves);
     cout << "Total number of moves: " << nMoves << endl; 
