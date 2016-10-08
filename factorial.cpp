@@ -4,7 +4,7 @@ using namespace std;
 
 unsigned factorial1(unsigned n)
 {
-    if (n > 2)
+    if (n > 1)
         return n*factorial1(n - 1);
     return 1;
 }
