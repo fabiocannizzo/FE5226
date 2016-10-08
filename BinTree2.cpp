@@ -45,35 +45,37 @@ Node *buildTree()
     return n1;
 }
 
-void visitTreeInPreOrder(Node *node, void(*action)(Node*) )
+void visitTreeInPreOrder(Node *node, void(*action)(Node*, void*), void *args )
 {
     if (node != NULL) {
-        action(node);                             // performs action
-        visitTreeInPreOrder(node->left, action);  // visit left
-        visitTreeInPreOrder(node->right, action); // visit right 
+        action(node, args);                             // performs action
+        visitTreeInPreOrder(node->left, action, args);  // visit left
+        visitTreeInPreOrder(node->right, action, args); // visit right 
     }
 }
 
-void printNode(Node *n)
+void printNode(Node *n, void *)
 {
     cout << n->value << " ";  // no end of line
 }
 
-void incrNode(Node *n)
+void incrNode(Node *n, void *a)
 {
-    ++n->value;
+    int *p = reinterpret_cast<int*>(a);
+    n->value += *p;
 }
 
 int main()
 {
     Node *treeTop = buildTree();
     
-    visitTreeInPreOrder( treeTop, &printNode );
+    visitTreeInPreOrder( treeTop, &printNode, NULL );
     cout << endl;
 
-    visitTreeInPreOrder( treeTop, &incrNode  );
+    int x = 3;
+    visitTreeInPreOrder( treeTop, &incrNode, &x  );
     
-    visitTreeInPreOrder( treeTop, &printNode );
+    visitTreeInPreOrder( treeTop, &printNode, NULL );
     cout << endl;
     
     return 0;
