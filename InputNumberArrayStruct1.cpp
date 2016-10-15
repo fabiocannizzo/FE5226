@@ -83,6 +83,8 @@ int main()
 {
     MyArray v;
 
+    v.initialize();
+
     // we start an infinite loop, which we will stop with 'break'
     // we keep asking the user to enter a number until a negative number is entered 
     while (true) {
