@@ -37,8 +37,4 @@ int main()
     size_t newsize = distance(v.begin(), it);
     v.resize( newsize );
     print(v);
-
-    //set<int> tmp(v.begin(), v.end());
-    //v.assign(tmp.begin(), tmp.end());
-    //print(v);
 }
