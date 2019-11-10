@@ -26,16 +26,14 @@ struct Square : Shape {
 
 int main()
 {
-    typedef unique_ptr<Shape> shape_ptr;
+    typedef shared_ptr<Shape> shape_ptr;
    // create a vector of 2 pointers to shape
-   vector<shape_ptr> s;
-   s.push_back(shape_ptr(new Square(3)));
-   s.push_back(shape_ptr(new Circle(2)));
+    vector<shape_ptr> s = { shape_ptr(new Square(3)), shape_ptr(new Circle(2)) };
 
    // we use Shape* to access the implementation of perimeter
    // in each specific class
-   for (int i = 0; i < 2; ++i)
-      cout << s[i]->perimeter() << endl;
+   for (auto sh : s)
+      cout << sh->perimeter() << endl;
 
    return 0;
 }
