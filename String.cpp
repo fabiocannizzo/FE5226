@@ -66,14 +66,14 @@ public:
         return *this += rhs.m_data;
     }
 
-    // first overload += operator
+    // first overload operator=
     String& operator=(const char* rhs)
     {
         reset(rhs);
         return *this;
     }
 
-    // second overload += operator
+    // second overload operator=
     String& operator=(const String& rhs)
     {
         return *this = rhs.m_data;
