@@ -7,14 +7,14 @@ using namespace std;
 
 class FactorialCalculator
 {
-    vector<unsigned long> m_cache;
+    vector<size_t> m_cache;
 public:
     FactorialCalculator()
         : m_cache(1,1)  // init with 0!
     {
     }
 
-    unsigned long operator()(unsigned long n)
+    size_t operator()(unsigned long n)
     {
         if (n + 1 > m_cache.size()) {
             for (size_t i = m_cache.size(); i <= n; ++i)
