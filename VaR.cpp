@@ -14,7 +14,7 @@ int main()
     generate(pl.begin(), pl.end(), []() { return (rand() % 201) - 100;} );
 
 
-    // We want to find what is our maximu loss with 95% confidence
+    // We want to find what is our maximum loss with 95% confidence
 
     // We could sort the vector, then read the 50-th element,
     // but that would be an overkill, beacuse we do not need to sort all vector
