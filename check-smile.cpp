@@ -47,8 +47,6 @@ bool check_for_arbitrages(const vector<VolMark>& marks, double fwd, double expir
         p2.slope = (p2.price - p1.price) / (p2.strike - p1.strike);
         if (p1.strike >= p2.strike) // strikes must be in increasing order
             return false;
-        if (p1.price <= p2.price)   // prices must be in decreasing order
-            return false;
         if (p1.slope >= p2.slope)   // slopes must be in increasing order
             return false;
 
@@ -67,7 +65,7 @@ int main()
     vector<VolMark> marks =
         { { 0.412605041576915,	0.35 }
         , { 0.627556851754149,	0.32 }
-        , { 1.0,	            0.30 }
+        , { 1.0,                0.30 }
         , { 1.59348113045318,	0.31 } // try with vol=0.61
         , { 2.4236252567766,	0.32 }
         };
