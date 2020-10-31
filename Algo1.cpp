@@ -9,14 +9,13 @@ using namespace std;
 // assumes that b>a
 int myrand(int a, int b)
 {
-    int div = b-a;
     return a + (rand() % (b-a));
 }
 
 void print( const vector<int>& v )
 {
-    for (size_t i = 0; i < v.size(); ++i)
-        cout << v[i] << ", ";
+    for (auto x :  v)
+        cout << x << ", ";
     cout << endl;
 }
 
