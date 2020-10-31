@@ -10,7 +10,6 @@ using namespace std;
 // assumes that b>a
 int myrand(int a, int b)
 {
-    int div = b-a;
     return a + (rand() % (b-a));
 }
 
@@ -18,8 +17,8 @@ int myrand(int a, int b)
 template <typename Container>
 void print( const Container& v )
 {
-    for ( auto i = v.begin(); i != v.end(); ++i)
-        cout << *i << ", ";
+    for ( const auto& x : v)
+        cout << x << ", ";
     cout << endl;
 }
 
@@ -33,9 +32,10 @@ int main()
 
     // copy all elements into as set, which will sort and remove duplicates
     set<int> tmp(v.begin(), v.end());
-    print(v);  // note we use the same print function as per a vector, thanks to templates
-    
-    // copy back to the vector 
+    print(v);
+    print(tmp);  // note we use the same print function as per a vector, thanks to templates
+
+    // copy back to the vector
     v.assign(tmp.begin(), tmp.end());
     print(v);
 }
