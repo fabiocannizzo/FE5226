@@ -21,7 +21,7 @@ double cnorm(double x)
 double ucall(double fwd, double strike, double vol, double expiry)
 {
     double stdev = vol * sqrt(expiry);
-    double d1 = log(fwd / strike) / stdev;
+    double d1 = log(fwd / strike) / stdev + 0.5 * stdev;
     double d2 = d1 - stdev;
     double nd1 = cnorm(d1);
     double nd2 = cnorm(d2);
