@@ -8,7 +8,7 @@ struct Shape {
 };
 
 struct Circle : Shape {
-   double radius;   
+   double radius;
    Circle( double r) : radius(r) {}
    virtual double perimeter() const { return 2*3.14*radius; }
 };
@@ -22,7 +22,7 @@ struct Square : Shape {
 int main()
 {
    // create a vector of 2 pointers to shape and initialize it
-   // with a circle and a square 
+   // with a circle and a square
    Shape *s[2] = { new Square(3), new Circle(2) };
 
    // we use Shape* to access the implementation of perimeter
