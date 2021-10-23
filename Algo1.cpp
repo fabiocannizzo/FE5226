@@ -30,10 +30,9 @@ int main()
     sort(v.begin(), v.end());
     print(v);
 
+    // remove duplicate elemenets (the function unique operates on sorted vectors)
     auto it = unique(v.begin(), v.end());
     print(v);
-
-    size_t newsize = distance(v.begin(), it);
-    v.resize( newsize );
+    v.erase( it, v.end() );
     print(v);
 }
