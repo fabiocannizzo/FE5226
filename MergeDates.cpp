@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <vector>
 #include <functional>
+#include <set>
 
 using namespace std;
 
@@ -47,6 +48,7 @@ int main()
 #if VERSION_TO_USE==1
     // we do not know in advance the size of the results,
     // but we know it cannot be big the the sum of the two sizes
+    // This method requires that v1 and v2 are sorted
     vector<int> res(v1.size() + v2.size());
     // compute the union
     auto it = set_union(v1.begin(), v1.end(), v2.begin(), v2.end(), res.begin());  // O(n)
@@ -54,6 +56,7 @@ int main()
     res.erase(it, res.end());
 #elif VERSION_TO_USE==2
     // 2 operations with cost O(n logn) + memory allocation
+    // This method does not require that v1 and v2 are sorted
     vector<int> res;
     set<int> temp(v1.begin(), v1.end());
     temp.insert(v2.begin(), v2.end());
@@ -61,6 +64,7 @@ int main()
 #else
     // we do not know in advance the size of the results,
     // but we know it cannot be big the the sum of the two sizes
+    // This method does not require that v1 and v2 are sorted
     vector<int> res;
     res.reserve(v1.size() + v2.size());
     res = v1;
