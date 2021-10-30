@@ -1,10 +1,8 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-using namespace std;
 #include <iostream>
 #include <memory>
-#include <vector>
 
 using namespace std;
 
@@ -32,6 +30,7 @@ int main()
 
    // we use Shape* to access the implementation of perimeter
    // in each specific class
+   // Note the use of reference to avoid creating copy of shape_ptr objects
    for (const auto& sh : s)
       cout << sh->perimeter() << endl;
 
