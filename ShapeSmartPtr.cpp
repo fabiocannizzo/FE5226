@@ -13,7 +13,7 @@ struct Shape {
 };
 
 struct Circle : Shape {
-   double radius;   
+   double radius;
    Circle( double r) : radius(r) {}
    virtual double perimeter() const { return 2*3.14*radius; }
 };
@@ -32,7 +32,7 @@ int main()
 
    // we use Shape* to access the implementation of perimeter
    // in each specific class
-   for (auto sh : s)
+   for (const auto& sh : s)
       cout << sh->perimeter() << endl;
 
    return 0;
