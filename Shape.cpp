@@ -27,12 +27,12 @@ int main()
 
    // we use Shape* to access the implementation of perimeter
    // in each specific class
-   for (int i = 0; i < 2; ++i)
-      cout << s[i]->perimeter() << endl;
+   for (auto p : s)
+      cout << p->perimeter() << endl;
 
    // remember we need to release the objects created with new
-   for (int i = 0; i < 2; ++i)
-      delete s[i];
+   for (auto p : s)
+      delete p;
 
    return 0;
 }
