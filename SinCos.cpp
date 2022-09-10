@@ -8,6 +8,9 @@
 */
 
 // define is a compiler directive
+// NOTE: if we were working with C++20 standard (or higher)
+// we would not this. We would instead import the header <numbers>,
+// which makes available various numerical constant
 #define _USE_MATH_DEFINES  // cause import of some macros like M_PI
 
 #include <iostream>
@@ -21,13 +24,13 @@ int main()
 {
     const unsigned nPoints = 10;
     const double step = M_PI / nPoints;  // here nPoints is lifted to double
-    
+
+    cout << std::fixed << std::setprecision(3)
     for (unsigned i = 0; i < 2 * nPoints; ++i) {
         double x = i*step;
-        cout << std::fixed << std::setprecision(3)
-            << std::setw(8) << x << ", "
-            << std::setw(8) << sin(x)*cos(x)
-            << "\n";
+        cout << std::setw(8) << x << ", "
+             << std::setw(8) << sin(x)*cos(x)
+             << "\n";
     }
 
     cout << "\n";
