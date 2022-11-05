@@ -37,14 +37,14 @@ struct Quadrilateral
 	Quadrilateral(const Point& p1, const Point& p2, const Point& p3, const Point& p4) : m_vertex{ p1, p2, p3, p4 } {}
 
 	// length of a side between points i and j
-	double sideLength(size_t i, size_t j) const { return m_vertex[i].distance(m_vertex[j]); }
+	double distance(size_t i, size_t j) const { return m_vertex[i].distance(m_vertex[j]); }
 
 	// perimeter
 	double perimeter() const
 	{
-		double d = sideLength(0, 3);
+		double d = distance(0, 3);
 		for (size_t i = 1; i < m_vertex.size(); ++i)
-			d += sideLength(i-1, i);
+			d += distance(i-1, i);
 		return d;
 	}
 
@@ -61,8 +61,8 @@ struct Rectangle : Quadrilateral
     Rectangle(const Point& topLeft, const Point& btmRight)
 		: Quadrilateral{ topLeft, {btmRight.x(), topLeft.y()}, btmRight, {topLeft.x(), btmRight.y()} }
 		{}
-    double base() const { return sideLength(0,1); }
-    double height() const { return sideLength(1,2); }
+    double base() const { return distance(0,1); }
+    double height() const { return distance(1,2); }
 	double area() const { return base() * height(); };
 };
 
@@ -82,9 +82,9 @@ struct Trapeze : Quadrilateral
     Trapeze(const Point& topLeft, const Point& btmLeft, double topBase, double btmBase)
 		: Quadrilateral{ topLeft, {topLeft.x()+topBase, topLeft.y()}, {btmLeft.x() + btmBase, btmLeft.y()}, btmLeft }
 		{}
-	double upperBase() const { return sideLength(0,1); }
-	double lowerBase() const { return sideLength(2,3); }
-	double height() const { return sideLength(2,3); }
+	double upperBase() const { return distance(0,1); }
+	double lowerBase() const { return distance(2,3); }
+	double height() const { return distance(2,3); }
 	double area() const { return (upperBase() + (3,2)) / 2.0 * p(1).ydistance(p(2)); }
 };
 
