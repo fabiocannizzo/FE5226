@@ -25,7 +25,7 @@ int main()
     const unsigned nPoints = 10;
     const double step = M_PI / nPoints;  // here nPoints is lifted to double
 
-    cout << std::fixed << std::setprecision(3)
+    cout << std::fixed << std::setprecision(3);
     for (unsigned i = 0; i < 2 * nPoints; ++i) {
         double x = i*step;
         cout << std::setw(8) << x << ", "
