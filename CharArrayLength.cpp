@@ -21,4 +21,11 @@ int main()
 
     // print length of array computed with the CRT function strlen
     cout << "String length: " << strlen(msg) << endl;
+
+    // print length of array computed with a loop
+    for (int i = 0; i < sizeof(msg); ++i)
+        if (msg[i] == 0) {
+            cout << "String length: " << i << endl;
+            break;
+        }
 }
