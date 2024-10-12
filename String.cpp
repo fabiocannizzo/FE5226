@@ -21,7 +21,7 @@ class String
         if (s != m_data) {
             // release previous memory
             delete [] m_data;
-            // allocate new memory: add 1 for the zero at the end
+            // allocate new memory: add 1 because of the null terminating character at the end
             m_data = new char[strlen(s) + 1];
             // copy from s
             strcpy(m_data, s);
@@ -31,10 +31,12 @@ class String
     friend  ostream& operator<<(ostream& os, const String& s);
 
 public:
-    String() : m_data(NULL) { reset(""); }
-    String(const char *s) : m_data(NULL) { reset(s); }
-    String(const String& s) : m_data(NULL) { reset(s.m_data); }
+    //constructor
+    String() : m_data(nullptr) { reset(""); }  // points to a string of null size (i.e. just one null character {0}
+    String(const char *s) : m_data(nullptr) { reset(s); }
+    String(const String& s) : m_data(nullptr) { reset(s.m_data); }
 
+    // destructor
     ~String() { delete[] m_data; }
 
     // lenght of the string
@@ -51,11 +53,11 @@ public:
         unsigned n2 = strlen(rhs);
         if (n2>0) {
             unsigned n1 = length();
-            char *tmp = new char[n1+n2+1];
+            char *tmp = new char[n1+n2+1];  // allocate new memory storage
             strncpy(tmp, m_data, n1);
             strcpy(tmp+n1, rhs);
-            delete [] m_data;
-            m_data = tmp;
+            delete [] m_data;               // delete old memory storage
+            m_data = tmp;                   // point to the new memory storage
         }
         return *this;
     }
@@ -63,10 +65,11 @@ public:
     // second overload += operator
     String& operator+=(const String& rhs)
     {
-        return *this += rhs.m_data;
+        return *this += rhs.m_data;  // dispatch to the other overload operator +=, which takes an argument const char*
     }
 
     // first overload operator=
+    // makes a copy of the string pointed by rhs
     String& operator=(const char* rhs)
     {
         reset(rhs);
@@ -74,12 +77,14 @@ public:
     }
 
     // second overload operator=
+    // makes a deep copy of the string contained in rhs
     String& operator=(const String& rhs)
     {
-        return *this = rhs.m_data;
+        return *this = rhs.m_data;   // dispatch to the other overload operator =, which takes an argument const char*
     }
 };
 
+// streaming operator
 ostream& operator<<(ostream& os, const String& s)
 {
     os << s.m_data;
@@ -92,10 +97,10 @@ int main()
     String s2("World");
 
     cout << s1 << endl;
-    
+
     s1 += " ";
     cout << s1 << endl;
-    
+
     s1 += s2;
     cout << s1 << endl;
 
