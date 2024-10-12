@@ -1,38 +1,39 @@
 #include <iostream>
-#include <vector>
+#include <exception>
+//#include <vector>
 
-#include "GetInteger.h"
+//#include "GetInteger.h"
 
 using namespace std;
 
-class FactorialCalculator
+struct A {};
+struct B {};
+struct C {};
+void foo(int x)
 {
-    vector<size_t> m_cache;
-public:
-    FactorialCalculator()
-        : m_cache(1,1)  // init with 0!
-    {
+    if (x > 10)
+        throw A{};
+    else if (x < -10)
+        throw B{};
+    else
+        throw C{};
+}
+void bar(int x)
+{
+    try {
+        foo(x);
     }
-
-    size_t operator()(unsigned long n)
-    {
-        if (n + 1 > m_cache.size()) {
-            for (size_t i = m_cache.size(); i <= n; ++i)
-                m_cache.push_back(i * m_cache.back());
-        }
-        return m_cache[n];
-    }
-};
-
+    catch (A&) { cout << "A exception"; } // catch A exceptions, others pass through
+}
 int main()
 {
-    FactorialCalculator f;
-    while(true)
-    {
-         int n = getInteger("Enter a positive integer (-1 to terminate): ");
-         if (n < 0)
-             break;
-         cout << "Factorial of " << n << " is " << f(n) << endl;
-    }
+    std::cout << "running\n";
+    try { bar(20); }
+    catch (B&) {
+        cout << "B exception";
+    } // catch B exceptions, others pass through
+    catch (...) {
+        cout << "Some other exception";
+    } // catch everything else. No special handler for C
     return 0;
 }
