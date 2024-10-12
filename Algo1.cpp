@@ -25,6 +25,7 @@ int main()
 
     // fill vector with random numbers in the range [1,16), i.e. [1,15]
     generate( v.begin(), v.end(), bind(myrand, 1, 16) );
+    //generate( v.begin(), v.end(), [](){return 1 + (rand() % 15)} );
     print(v);
 
     sort(v.begin(), v.end());
