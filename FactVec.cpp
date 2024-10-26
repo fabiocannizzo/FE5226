@@ -1,39 +1,27 @@
 #include <iostream>
-#include <exception>
-//#include <vector>
-
-//#include "GetInteger.h"
+#include <vector>
 
 using namespace std;
 
-struct A {};
-struct B {};
-struct C {};
-void foo(int x)
+struct Fact
 {
-    if (x > 10)
-        throw A{};
-    else if (x < -10)
-        throw B{};
-    else
-        throw C{};
-}
-void bar(int x)
-{
-    try {
-        foo(x);
+    Fact() : v(1,1) {}
+
+    double operator()(size_t n)
+    {
+        for (size_t i = v.size(); i <= n; ++i)
+            v.push_back(v.back() * i);
+        return v[n];
     }
-    catch (A&) { cout << "A exception"; } // catch A exceptions, others pass through
-}
+
+    std::vector<double> v;
+};
+
 int main()
 {
-    std::cout << "running\n";
-    try { bar(20); }
-    catch (B&) {
-        cout << "B exception";
-    } // catch B exceptions, others pass through
-    catch (...) {
-        cout << "Some other exception";
-    } // catch everything else. No special handler for C
+    Fact f{};
+    size_t n = 3;
+    std::cout << "factorial of " << n << " is: " << f(n) << "\n";
+
     return 0;
 }
