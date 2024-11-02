@@ -29,7 +29,7 @@ double ucall(double fwd, double strike, double vol, double expiry)
 }
 
 // return false if it find an arbitrage, true otherwise
-// Efficient implementation: it does not allocate temporary memory
+// Efficient implementation: it does not allocate temporary memory using pOld and pNew
 bool check_for_arbitrages(const vector<VolMark>& marks, double fwd, double expiry)
 {
     struct StrikeAndPrice
@@ -39,20 +39,20 @@ bool check_for_arbitrages(const vector<VolMark>& marks, double fwd, double expir
         double slope;
     };
 
-    StrikeAndPrice p1 = {0, fwd, -1.0};
-    for (const auto& cur : marks) {
-        StrikeAndPrice p2;
-        p2.strike = cur.strike;
-        p2.price = ucall(fwd, cur.strike, cur.volatility, expiry);
-        p2.slope = (p2.price - p1.price) / (p2.strike - p1.strike);
-        if (p1.strike >= p2.strike) // strikes must be in increasing order
+    StrikeAndPrice pOld = {0, fwd, -1.0};
+    for (const auto& [strike, volatility] : marks) {
+        StrikeAndPrice pNew;
+        pNew.strike = strike;
+        pNew.price = ucall(fwd, strike, volatility, expiry);
+        pNew.slope = (pNew.price - pOld.price) / (pNew.strike - pOld.strike);
+        if (pOld.strike >= pNew.strike) // strikes must be in increasing order
             return false;
-        if (p1.slope >= p2.slope)   // slopes must be in increasing order
+        if (pOld.slope >= pNew.slope)   // slopes must be in increasing order
             return false;
 
-        p1 = p2; // corkscrew
+        pOld = pNew; // corkscrew
     }
-    if (p1.slope >= 0) // last slope must be < 0
+    if (pOld.slope >= 0) // last slope must be < 0
         return false;
 
     return true;
