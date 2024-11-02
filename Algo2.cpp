@@ -30,7 +30,7 @@ int main()
     generate( v.begin(), v.end(), bind(myrand, 1, 16) );
     print(v);
 
-    // copy all elements into as set, which will sort and remove duplicates
+    // copy all elements into a set, which will sort and remove duplicates
     set<int> tmp(v.begin(), v.end());
     print(v);
     print(tmp);  // note we use the same print function as per a vector, thanks to templates
