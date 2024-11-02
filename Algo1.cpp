@@ -31,7 +31,7 @@ int main()
     sort(v.begin(), v.end());
     print(v);
 
-    // remove duplicate elemenets (the function unique operates on sorted vectors)
+    // remove duplicate elements (the function unique operates on sorted vectors)
     auto it = unique(v.begin(), v.end());
     print(v);
     v.erase( it, v.end() );
