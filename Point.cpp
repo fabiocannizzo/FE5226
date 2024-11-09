@@ -22,7 +22,7 @@ struct Point
 	double x() const {return m_x;}
 	double y() const {return m_y;}
 
-	// vertcial and horizontal distance
+	// vertical and horizontal distance
 	double xdistance(const Point& p) const { return abs(m_x - p.m_x); }
 	double ydistance(const Point& p) const { return abs(m_y - p.m_y); }
 
