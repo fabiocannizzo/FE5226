@@ -13,13 +13,13 @@ struct Shape {
 struct Circle : Shape {
    double radius;
    Circle( double r) : radius(r) {}
-   virtual double perimeter() const { return 2*3.14*radius; }
+   double perimeter() const override { return 2*3.14*radius; }
 };
 
 struct Square : Shape {
    double side;
    Square(double l) : side(l) {}
-   virtual double perimeter() const { return 4*side; }
+   double perimeter() const override { return 4*side; }
 };
 
 int main()

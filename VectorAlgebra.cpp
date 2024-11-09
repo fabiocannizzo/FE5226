@@ -1,15 +1,15 @@
 #include <vector>
+#include <algorithm>
 
 // generic pointer based function
 template <typename F>
 void binaryVectorOp(double *dest, const double *src1, const double *src2, size_t n, F&& f)
 {
-    std::tranform(src1, src1+n, src2, dest, f);
+    std::transform(src1, src1+n, src2, dest, f);
 }
 
 
 // pointer based add function
-template <typename F>
 void vectorAdd(double *dest, const double *src1, const double *src2, size_t n)
 {
     binaryVectorOp(dest, src1, src2, n, std::plus<double>{});
