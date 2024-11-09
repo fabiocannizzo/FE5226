@@ -14,6 +14,7 @@ New memory is allocated only if the capacity of the container is not large enoug
 
 #include <iostream>
 #include <string>
+#include <cstring>
 
 using namespace std;
 

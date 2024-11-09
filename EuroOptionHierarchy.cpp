@@ -56,7 +56,7 @@ public:
     using EuropeanOption::EuropeanOption; // inherit constructor of base class
 
     // implements virtual method declared in the base class
-    virtual double undiscounted(double fwd, double stdev) const
+    double undiscounted(double fwd, double stdev) const override
     {
         double d1 = log(fwd / strike()) / stdev + 0.5 * stdev;
         double d2 = d1 - stdev;
@@ -74,7 +74,7 @@ public:
     using EuropeanOption::EuropeanOption; // resuse constructor of new class
 
     // implements virtual method declared in the base class
-    virtual double undiscounted(double fwd, double stdev) const
+    double undiscounted(double fwd, double stdev) const override
     {
         double d2 = log(fwd / strike()) / stdev - 0.5 * stdev;
         double nd2 = cnorm(d2);
