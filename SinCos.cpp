@@ -7,13 +7,8 @@
  Justify the output to the right and print exactly 4 decimals
 */
 
-// define is a compiler directive
-// NOTE: if we were working with C++20 standard (or higher)
-// we would not this. We would instead import the header <numbers>,
-// which makes available various numerical constant
-#define _USE_MATH_DEFINES  // cause import of some macros like M_PI
-
 #include <iostream>
+#include <numbers>  // we use this for PI (requires c++20)
 #include <iomanip>  // needed to format the output
 #include <cmath>    // needed for sin, cos and M_PI
 
@@ -23,7 +18,7 @@ using namespace std;
 int main()
 {
     const unsigned nPoints = 10;
-    const double step = M_PI / nPoints;  // here nPoints is lifted to double
+    const double step = std::numbers::pi / nPoints;  // here nPoints is lifted to double
 
     cout << std::fixed << std::setprecision(3);
     for (unsigned i = 0; i < 2 * nPoints; ++i) {
@@ -32,7 +27,6 @@ int main()
              << std::setw(8) << sin(x)*cos(x)
              << "\n";
     }
-
     cout << "\n";
 }
 
