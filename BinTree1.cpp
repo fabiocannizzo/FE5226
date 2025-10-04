@@ -31,13 +31,13 @@ Node *buildTree()
 {
     Node *n1, *n2, *n3;
 
-    n1 = createNode(4, NULL, NULL);
-    n1 = createNode(2, n1, NULL);
+    n1 = createNode(4, nullptr, nullptr);
+    n1 = createNode(2, n1, nullptr);
 
-    n2 = createNode(7, NULL, NULL);
-    n2 = createNode(6, NULL, n2);
+    n2 = createNode(7, nullptr, nullptr);
+    n2 = createNode(6, nullptr, n2);
 
-    n3 = createNode(5, NULL, NULL);
+    n3 = createNode(5, nullptr, nullptr);
     n3 = createNode(3, n3, n2);
 
     n1 = createNode(1, n1, n3);
@@ -47,7 +47,7 @@ Node *buildTree()
 
 void printTreeInPreOrder(Node *node)
 {
-    if (node != NULL) {
+    if (node != nullptr) {
         cout << node->value << endl;  // print value
         printTreeInPreOrder(node->left);  // visit left
         printTreeInPreOrder(node->right); // visit right 
