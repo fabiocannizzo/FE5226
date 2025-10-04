@@ -10,7 +10,7 @@
 #include <iostream>
 #include <numbers>  // we use this for PI (requires c++20)
 #include <iomanip>  // needed to format the output
-#include <cmath>    // needed for sin, cos and M_PI
+#include <cmath>    // needed for sin, cos
 
 // import only the symbols needed
 using namespace std;

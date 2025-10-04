@@ -14,7 +14,7 @@ class Matrix
 
 public:
    // default constructor
-   Matrix() : m_data(NULL), m_nRows(0), m_nCols(0) {}
+   Matrix() : m_data(nullptr), m_nRows(0), m_nCols(0) {}
 
    // another constructor
    Matrix(unsigned nr, unsigned nc, double v )
@@ -74,7 +74,7 @@ public:
         if (this != &m) {
             unsigned nElements = m.m_nRows*m.m_nCols;
             delete [] m_data; // release memory (note that if nElements<currentsize, we could skip memory reallocation)
-            m_data = NULL; // for safety, set the the pointer to NULL, in case something goes wrong in the allocation
+            m_data = nullptr; // for safety, set the the pointer to nullptr, in case something goes wrong in the allocation
             m_data = new double [nElements];  // allocate memory
             m_nRows = m.m_nRows;
             m_nCols = m.m_nCols;
