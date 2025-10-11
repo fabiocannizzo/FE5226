@@ -2,7 +2,7 @@
  Author: Fabio Cannizzo
  NUS FE5226 Example Program
 
- A dumb String class
+ A dumb String class: just an academic exercise!
 */
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -16,13 +16,13 @@ using namespace std;
 
 class String
 {
-    char *m_data;
+    char* m_data = nullptr;
 
-    void reset(const char *s)
+    void reset(const char* s)
     {
         if (s != m_data) {
             // release previous memory
-            delete [] m_data;
+            delete[] m_data;
             // allocate new memory: add 1 because of the null terminating character at the end
             m_data = new char[strlen(s) + 1];
             // copy from s
@@ -34,17 +34,18 @@ class String
 
 public:
     //constructor
-    String() : m_data(nullptr) { reset(""); }  // points to a string of null size (i.e. just one null character {0}
-    String(const char *s) : m_data(nullptr) { reset(s); }
-    String(const String& s) : m_data(nullptr) { reset(s.m_data); }
+    String() { reset(""); }  // points to a string of null size (i.e. just one null character {0}
+    String(const char* s) { reset(s); }
+    String(const String& s) { reset(s.m_data); }
+    //String(const String& s) : String(s.m_data) {}
 
     // destructor
     ~String() { delete[] m_data; }
 
     // lenght of the string
-    unsigned length() const { return strlen(m_data); }
+    size_t length() const { return strlen(m_data); }
 
-    const char *operator()() const
+    const char* c_str() const
     {
         return m_data;
     }
@@ -52,13 +53,13 @@ public:
     // first overload += operator
     String& operator+=(const char* rhs)
     {
-        unsigned n2 = strlen(rhs);
-        if (n2>0) {
-            unsigned n1 = length();
-            char *tmp = new char[n1+n2+1];  // allocate new memory storage
+        auto n2 = strlen(rhs);
+        if (n2 > 0) {
+            auto n1 = length();
+            char* tmp = new char[n1 + n2 + 1];  // allocate new memory storage
             strncpy(tmp, m_data, n1);
-            strcpy(tmp+n1, rhs);
-            delete [] m_data;               // delete old memory storage
+            strcpy(tmp + n1, rhs);
+            delete[] m_data;               // delete old memory storage
             m_data = tmp;                   // point to the new memory storage
         }
         return *this;
@@ -112,3 +113,4 @@ int main()
 
     return 0;
 }
+
