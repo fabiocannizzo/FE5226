@@ -10,13 +10,16 @@ struct Point
 	Point() : m_x(0), m_y(0) {}  // set in the origin
 	Point( double x, double y) : m_x(x), m_y(y) {}
 
-	// disatance
-    double distance(const Point& p) const
+	// distance
+        double distance(const Point& p) const
 	{
 		double dx = m_x - p.m_x;
 		double dy = m_y - p.m_y;
 		return sqrt(dx*dx+dy*dy);
 	}
+
+        // static function
+        static double distance(const Point& p1, const Point& p2) { return p1.distance(p2); }
 
 	// accessor methods
 	double x() const {return m_x;}
@@ -33,7 +36,7 @@ private:
 struct Quadrilateral
 {
 	// constructors
-	Quadrilateral() {}  // degenerate quadrilateral
+	Quadrilateral() : m_vertex{} {}  // degenerate quadrilateral
 	Quadrilateral(const Point& p1, const Point& p2, const Point& p3, const Point& p4) : m_vertex{ p1, p2, p3, p4 } {}
 
 	// length of a side between points i and j
@@ -57,18 +60,18 @@ private:
 
 struct Rectangle : Quadrilateral
 {
-	Rectangle() {}
+    Rectangle() {}
     Rectangle(const Point& topLeft, const Point& btmRight)
 		: Quadrilateral{ topLeft, {btmRight.x(), topLeft.y()}, btmRight, {topLeft.x(), btmRight.y()} }
 		{}
     double base() const { return distance(0,1); }
     double height() const { return distance(1,2); }
-	double area() const { return base() * height(); };
+    double area() const { return base() * height(); };
 };
 
 struct Square : Rectangle
 {
-	Square() {}
+    Square() {}
     Square(const Point& topLeft, double sidelength)
 		: Rectangle{ topLeft, {topLeft.x() + sidelength, topLeft.y() - sidelength } }
 		{}
@@ -78,14 +81,14 @@ struct Square : Rectangle
 
 struct Trapeze : Quadrilateral
 {
-	Trapeze() {}
+    Trapeze() {}
     Trapeze(const Point& topLeft, const Point& btmLeft, double topBase, double btmBase)
 		: Quadrilateral{ topLeft, {topLeft.x()+topBase, topLeft.y()}, {btmLeft.x() + btmBase, btmLeft.y()}, btmLeft }
 		{}
-	double upperBase() const { return distance(0,1); }
-	double lowerBase() const { return distance(2,3); }
-	double height() const { return distance(2,3); }
-	double area() const { return (upperBase() + (3,2)) / 2.0 * p(1).ydistance(p(2)); }
+    double upperBase() const { return distance(0,1); }
+    double lowerBase() const { return distance(2,3); }
+    double height() const { return distance(2,3); }
+    double area() const { return (upperBase() + (3,2)) / 2.0 * p(1).ydistance(p(2)); }
 };
 
 int main()
