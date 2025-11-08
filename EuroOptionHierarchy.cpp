@@ -15,10 +15,10 @@ double cnorm(double x)
 class EuropeanOption
 {
     double m_notional;
-    double m_tExpiry;   // absolute time specified in years
-    double m_tSettle;   // absolute time specified in years
+    double m_tExpiry;   // absolute time specified in years since epoch
+    double m_tSettle;   // absolute time specified in years since epoch
     double m_strike;
-    bool   m_isCall;  // call or put option
+    bool   m_isCall;    // call or put option
 
 public:
     EuropeanOption(double notional, double tExpiry, double tSettle, double strike, bool isCall)
@@ -63,7 +63,7 @@ public:
         double nd1 = cnorm(d1);
         double nd2 = cnorm(d2);
         double u = fwd * nd1 - strike() * nd2;
-        // if it is a put we use put-call parity:  F-K = Call-Put => Put = Call - (F-K)
+        // if it is a put we use forward vanilla put-call parity:  F-K = Call-Put => Put = Call - (F-K)
         return isCall() ? u : u - (fwd - strike());
     }
 };
@@ -71,7 +71,7 @@ public:
 class EuropeanDigital : public EuropeanOption
 {
 public:
-    using EuropeanOption::EuropeanOption; // resuse constructor of new class
+    using EuropeanOption::EuropeanOption; // resuse constructor of base class
 
     // implements virtual method declared in the base class
     double undiscounted(double fwd, double stdev) const override
@@ -79,7 +79,7 @@ public:
         double d2 = log(fwd / strike()) / stdev - 0.5 * stdev;
         double nd2 = cnorm(d2);
 
-        // if it is a put we use digital put-call parity: P(S<K)+P(S>K)=1
+        // if it is a put we use forward digital put-call parity: P(S<K)+P(S>K)=1
         return isCall() ? nd2 : 1 - nd2;
     }
 };
