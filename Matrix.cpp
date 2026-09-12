@@ -17,7 +17,7 @@ public:
    Matrix() : m_data(nullptr), m_nRows(0), m_nCols(0) {}
 
    // another constructor
-   Matrix(unsigned nr, unsigned nc, double v )
+   Matrix(unsigned nr, unsigned nc, double v = 0.0)
         : m_data(new double[nr*nc])  // allocate memory
         , m_nRows(nr)
         , m_nCols(nc)
@@ -44,6 +44,17 @@ public:
             unsigned nBytesToCopy = m.m_nRows*m.m_nCols*sizeof(double);
             memcpy(m_data, m.m_data, nBytesToCopy);
         }
+
+    // move constructor
+    Matrix(Matrix&& m)
+       : m_data(m.m_data)
+       , m_nRows(m.m_nRows)
+       , m_nCols(m.m_nCols)
+    {
+        m.m_nRows = 0;
+        m.m_nCols = 0;
+        m.m_data = nullptr;
+    }
 
     // destructor
     ~Matrix()
@@ -83,6 +94,23 @@ public:
         }
         return *this;
     }
+
+    // assignment operator with move-semantic
+    Matrix& operator=(Matrix&& m)
+    {
+        // we check that the user is not trying to assign the matrix to itself
+        if (this != &m) {
+            m_nRows = m.m_nRows;
+            m_nCols = m.m_nCols;
+            m_data = m.m_data;  // setaling memory block
+            // the rvalue which was passed as argument, is now an empry matrix
+            m.m_nRows = 0;
+            m.m_nCols = 0;
+            m.m_data = nullptr;
+        }
+        return *this;
+    }
+
 };
 
 int main()

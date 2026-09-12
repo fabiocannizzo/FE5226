@@ -48,8 +48,8 @@ void move(unsigned nDiscs, Tower& p1, Tower& p2, Tower& p3, unsigned& nMoves)
         // move one disc and print message
         unsigned discid = p1.pop();
         p2.push(discid);
-        cout << setw(4) << ++nMoves << ".  " 
-             <<  p1.name() << " --> " << p2.name() 
+        cout << setw(4) << ++nMoves << ".  "
+             <<  p1.name() << " --> " << p2.name()
              << ": " << discid << endl;
     }
 }
@@ -70,7 +70,7 @@ int main()
     // move nDiscs discs from tower1 to tower2 using tower3
     unsigned nMoves = 0;
     move(nDiscs, p1, p2, p3, nMoves);
-    cout << "Total number of moves: " << nMoves << endl; 
+    cout << "Total number of moves: " << nMoves << endl;
 
     return 0;
 }

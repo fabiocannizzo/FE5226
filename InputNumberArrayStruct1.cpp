@@ -60,7 +60,7 @@ struct MyArray
         m_numbers = tmp;
     }
 
-    void printArray()
+    void printArray() const
     {
         for (unsigned i = 0u; i < m_size; ++i)
             cout << m_numbers[i] << " ";
