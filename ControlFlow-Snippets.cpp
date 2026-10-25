@@ -284,7 +284,6 @@ int main()
 {
 	const int n = 100;
 	int x[n];
-	bool isprime = 1;
 	for (int j = 0; j < n; j++)
 	{
 		x[j] = j + 1;

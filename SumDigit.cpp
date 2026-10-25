@@ -10,7 +10,9 @@ int main()
     while(n) {
         auto digit = n % 10;
         std::cout << "lowest digit: " << digit << "\n";
-        std::cout << "residual:  (" << n << "-" << digit << ")/10 : " << (n /= 10) << "\n";
+        auto next_n = n / 10;
+        std::cout << "residual:  (" << n << "-" << digit << ")/10 : " << next_n << "\n";
+        n = next_n;
 
         sumDigits += digit;
     }

@@ -31,7 +31,7 @@ size_t getNthUglyNo(size_t n)
     size_t indices[3] = { 0, 0, 0 };
 
     // find and store the next n-1 ugly numbers
-    for (size_t i = 1, j2 = 0, j3 = 0, j4 = 0; i < n; ) {
+    for (size_t i = 1; i < n; ) {
 
         // find the pointer to the smallest candidate
         size_t* smallest_candidate_ptr = min_element(candidates, candidates +3);

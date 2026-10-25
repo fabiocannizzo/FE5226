@@ -90,7 +90,7 @@ struct Trapeze : Quadrilateral
     double upperBase() const { return distance(0,1); }
     double lowerBase() const { return distance(2,3); }
     double height() const { return distance(2,3); }
-    double area() const { return (upperBase() + (3,2)) / 2.0 * p(1).ydistance(p(2)); }
+    double area() const { return (upperBase() + lowerBase()) / 2.0 * p(1).ydistance(p(2)); }
 };
 
 int main()

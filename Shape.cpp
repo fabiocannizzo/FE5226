@@ -5,6 +5,7 @@ using namespace std;
 
 struct Shape {
    virtual double perimeter() const = 0;  // pure virtual method
+   virtual ~Shape() = default;
 };
 
 struct Circle : Shape {
