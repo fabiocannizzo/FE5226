@@ -11,15 +11,12 @@ struct Point
 	Point( double x, double y) : m_x(x), m_y(y) {}
 
 	// distance
-        double distance(const Point& p) const
+    double distance(const Point& p) const
 	{
 		double dx = m_x - p.m_x;
 		double dy = m_y - p.m_y;
 		return sqrt(dx*dx+dy*dy);
 	}
-
-        // static function
-        static double distance(const Point& p1, const Point& p2) { return p1.distance(p2); }
 
 	// accessor methods
 	double x() const {return m_x;}
@@ -60,7 +57,7 @@ private:
 
 struct Rectangle : Quadrilateral
 {
-    Rectangle() {}
+    Rectangle() {}  // implictily calls the default constructor of Quadrilateral
     Rectangle(const Point& topLeft, const Point& btmRight)
 		: Quadrilateral{ topLeft, {btmRight.x(), topLeft.y()}, btmRight, {topLeft.x(), btmRight.y()} }
 		{}
@@ -71,17 +68,22 @@ struct Rectangle : Quadrilateral
 
 struct Square : Rectangle
 {
-    Square() {}
+    Square() {}   // implictily calls the default constructor of Square
     Square(const Point& topLeft, double sidelength)
 		: Rectangle{ topLeft, {topLeft.x() + sidelength, topLeft.y() - sidelength } }
 		{}
-    double side() const { return base(); }
+    double side() const { return Rectangle::base(); }
+	
+private:
+    // hide this methods
+	double base() const;
+    double height() const;
 };
 
 
 struct Trapeze : Quadrilateral
 {
-    Trapeze() {}
+    Trapeze() {}   // implictily calls the default constructor of Quadrilateral
     Trapeze(const Point& topLeft, const Point& btmLeft, double topBase, double btmBase)
 		: Quadrilateral{ topLeft, {topLeft.x()+topBase, topLeft.y()}, {btmLeft.x() + btmBase, btmLeft.y()}, btmLeft }
 		{}

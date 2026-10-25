@@ -60,9 +60,9 @@ bool check_for_arbitrages(const vector<VolMark>& marks, double fwd, double expir
 
 int main()
 {
-    double fwd = 1.0;
-    double expiry = 1.0;
-    vector<VolMark> marks =
+    double fwd = 1.0;        // 1 USD per share
+    double expiry = 1.0;     // 1 year maturity
+    vector<VolMark> marks =  // define the smile
         { { 0.412605041576915,	0.35 }
         , { 0.627556851754149,	0.32 }
         , { 1.0,                0.30 }

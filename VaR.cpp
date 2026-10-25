@@ -14,27 +14,28 @@ int main()
     // let's pretend these are portfolio P&L in different possible future scenarios
     generate(pl.begin(), pl.end(), []() { return (rand() % 201) - 100;} );
 
-    vector<double> plcopy(pl);
-
     // We want to find what is our maximum loss with 95% confidence
 
-    // We could sort the vector, then read the 50-th element,
+    // We could sort the vector, then read the 500-th element,
     // but that would be an overkill, beacuse we do not need to sort all vector
-    // We just need a partial sorting so that all elements before element 50
-    // are smaller than element 50 and all elements after element 50 are larger
-    // than elemenet 50
-    // 95% left-quantile of the vector is element number 50
+    // We just need a partial sorting so that all elements before element 500
+    // are smaller than element 500 and all elements after element 501 are larger
+    // than elemenet 500
+    // 95% left-quantile of the vector is element number 500
 
-    size_t quantileIndex = pl.size() * 5 /100;
-
-    // iterator pointing to the 50-th element in the vector
-    auto quantileIter = plcopy.begin() + quantileIndex;
+    const size_t quantileIndex = pl.size() * 5 /100;
 
     //  
     // solve the problem using nth_element
     //
 
     {
+        // create a copy, so that we do not modify the orignal vector
+        vector<double> plcopy(pl);
+        
+        // iterator pointing to the 500-th element in the vector
+        auto quantileIter = plcopy.begin() + quantileIndex;
+    	
         // Record the starting time point
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -57,6 +58,12 @@ int main()
     //
 
     {
+    	// create a copy, so that we do not modify the orignal vector
+        vector<double> plcopy(pl);
+        
+        // iterator pointing to the 500-th element in the vector
+        auto quantileIter = plcopy.begin() + quantileIndex;
+    	
         // Record the starting time point
         auto start = std::chrono::high_resolution_clock::now();
 
