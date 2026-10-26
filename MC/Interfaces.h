@@ -1,0 +1,220 @@
+#pragma once
+
+#include "Matrix.h"
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace mc {
+
+// Base polymorphic interface
+struct IObject {
+    virtual ~IObject() = default;
+};
+
+// Date represented as integer day offset from valuation date (T_0 = 0)
+using Date = int;
+
+// ----------------------------------------------------------------------------
+// Events: stores observed lifecycle events (market fixings, payments, etc.)
+// ----------------------------------------------------------------------------
+struct Events {
+    std::string asset;
+    Date        date = 0;
+    double      value = 0.0;
+    std::string type = "FIXING";
+
+    Events() = default;
+    Events(std::string a, Date d, double v, std::string t = "FIXING")
+        : asset(std::move(a)), date(d), value(v), type(std::move(t)) {}
+};
+using Event = Events;
+
+inline bool lookupEvent(const std::vector<Events>& events,
+                        const std::string& asset,
+                        Date d,
+                        double& out) {
+    for (const auto& ev : events) {
+        if (ev.asset == asset && ev.date == d) {
+            out = ev.value;
+            return true;
+        }
+    }
+    return false;
+}
+
+inline double getEvent(const std::vector<Events>& events,
+                       const std::string& asset,
+                       Date d) {
+    double out = 0.0;
+    MYASSERT(lookupEvent(events, asset, d, out),
+             "Event not found: " << asset << " at date " << d);
+    return out;
+}
+
+// Forward declarations
+struct IModelMC;
+using IModel = IModelMC;
+
+// ----------------------------------------------------------------------------
+// 1. Pricer Interface (IPricer / IMCPricer)
+// ----------------------------------------------------------------------------
+struct PricerConfig {
+    std::string                        default_model = "BS_CLOSED"; // e.g. "BS_CLOSED", "BS_EULER"
+    std::map<std::string, std::string> model_overrides;             // asset -> model family
+    std::string                        base_ccy      = "USD";       // reporting currency
+};
+
+struct IPricer : IObject {
+    // 1. Future simulation dates required by this pricer (dates not yet observed)
+    virtual std::vector<Date> requiredDates() const = 0;
+
+    // 2. Concrete diffusion models needed (e.g. {"BS_CLOSED.EUR.USD"})
+    virtual std::vector<std::string> modelNeeded() const = 0;
+
+    // 3. Settlement date & currency for discounting
+    virtual Date        settlementDate() const = 0;
+    virtual std::string baseCurrency() const = 0;
+
+    // 4. Pre-bind integer indices into the engine's master timeline, model list & model objects
+    virtual void bindIndices(const std::vector<Date>&            master_dates,
+                             const std::vector<std::string>&     master_models,
+                             const std::vector<const IModelMC*>& models) = 0;
+
+    // 5. Evaluate discounted PV on one simulated trajectory
+    //    Stitches past events and reconstructed spot prices
+    virtual double pricePath(const std::vector<Matrix>& model_paths,
+                             double                     df_settle,
+                             double                     fx_to_base) const = 0;
+};
+
+using IMCPricer = IPricer;
+using pmcpricer_t = std::shared_ptr<IPricer>;
+using ppricer_t = std::shared_ptr<IPricer>;
+
+// ----------------------------------------------------------------------------
+// 2. Payoff Interface (Derivative Contract Specification & Pricer Factory)
+// ----------------------------------------------------------------------------
+struct IPayoff : IObject {
+    // Abstract underlying asset identifiers (e.g. {"EUR.USD", "GBP.USD"})
+    virtual std::vector<std::string> underlyingNames() const = 0;
+
+    // Cashflow payment date and currency
+    virtual Date        settlementDate() const = 0;
+    virtual std::string payoffCurrency() const = 0;
+
+    // Factory: generates dedicated pricer lifecycled against historical events
+    virtual std::shared_ptr<IPricer> getPricer(const std::vector<Events>& events) const = 0;
+};
+
+using ppayoff_t = std::shared_ptr<const IPayoff>;
+
+// ----------------------------------------------------------------------------
+// 3. Market Objects, Models, Discount Curves & Correlations
+// ----------------------------------------------------------------------------
+struct IMarketObject : IObject {
+    virtual std::string name() const = 0;
+};
+
+struct IModelMC : IMarketObject {
+    // Number of driving standard Brownian motions (NFactors)
+    virtual size_t numberOfBrownians() const = 0;
+
+    // Number of diffused state variables per time step (NStates)
+    virtual size_t numberOfStateVariables() const = 0;
+
+    // Optional hook to insert intermediate discretization dates (e.g. monthly for Euler)
+    virtual std::vector<Date> mergeDates(const std::vector<Date>& dates) const {
+        return dates;
+    }
+
+    // Pre-compute time-step constants on the merged timeline
+    virtual void configureTimeline(const std::vector<Date>& dates) = 0;
+
+    // Diffuse state variables across all time steps:
+    // rndNumbers: correlated standard normals [numberOfBrownians() x n_steps]
+    // stateVariables: diffused state variables [numberOfStateVariables() x n_dates]
+    virtual void diffuse(const ConstMatrixView& rndNumbers,
+                         MatrixView&            stateVariables) const = 0;
+
+    // Observable function: queries model object passing stateVariables to reconstruct observable (e.g. Spot)
+    virtual double observable(size_t date_idx, const Matrix& stateVariables) const = 0;
+
+    // Convenience alias for Spot observable
+    virtual double spot(size_t date_idx, const Matrix& stateVariables) const {
+        return observable(date_idx, stateVariables);
+    }
+};
+
+// ----------------------------------------------------------------------------
+// 4. Prepopulated Market Data Server
+// ----------------------------------------------------------------------------
+struct ICurve : IMarketObject {
+    virtual double df(Date d) const = 0;
+};
+
+struct ICorrelation : IMarketObject {
+    virtual double value() const = 0;
+};
+
+struct MarketDataServer {
+    std::map<std::string, double>  spots;
+    std::map<std::string, double>  vols;
+    std::map<std::string, double>  drifts;
+    std::map<std::string, double>  correlations;
+    std::map<std::string, ICurve*> discount_curves;
+
+    double getSpot(const std::string& asset) const {
+        auto it = spots.find(asset);
+        MYASSERT(it != spots.end(), "Spot not found in MarketDataServer: " << asset);
+        return it->second;
+    }
+    double getVol(const std::string& asset) const {
+        auto it = vols.find(asset);
+        MYASSERT(it != vols.end(), "Vol not found in MarketDataServer: " << asset);
+        return it->second;
+    }
+    double getDrift(const std::string& asset) const {
+        auto it = drifts.find(asset);
+        MYASSERT(it != drifts.end(), "Drift not found in MarketDataServer: " << asset);
+        return it->second;
+    }
+    double getCorrelation(const std::string& rfA, const std::string& rfB) const {
+        if (rfA == rfB)
+            return 1.0;
+        std::string key = (rfA < rfB) ? "CORR." + rfA + ":" + rfB : "CORR." + rfB + ":" + rfA;
+        auto        it  = correlations.find(key);
+        if (it != correlations.end())
+            return it->second;
+        return 0.0;
+    }
+    ICurve* getCurve(const std::string& ccy) const {
+        auto it = discount_curves.find(ccy);
+        MYASSERT(it != discount_curves.end(), "Discount curve not found: " << ccy);
+        return it->second;
+    }
+};
+
+// Canonical dictionary key for pairwise correlation between risk factors rfA and rfB
+// e.g. corrKey("BS.EUR.USD.0", "BS.GBP.USD.0") -> "CORR.BS.EUR.USD.0:BS.GBP.USD.0"
+inline std::string corrKey(const std::string& rfA, const std::string& rfB) {
+    if (rfA < rfB)
+        return "CORR." + rfA + ":" + rfB;
+    return "CORR." + rfB + ":" + rfA;
+}
+
+inline double getCorrelation(const std::map<std::string, IMarketObject*>& mkt,
+                             const std::string&                           rfA,
+                             const std::string&                           rfB) {
+    if (rfA == rfB)
+        return 1.0; // Unit diagonal
+    auto it = mkt.find(corrKey(rfA, rfB));
+    if (it == mkt.end())
+        return 0.0; // Uncorrelated by default if omitted
+    auto* c = dynamic_cast<ICorrelation*>(it->second);
+    MYASSERT(c != nullptr, "Market object is not an ICorrelation: " << corrKey(rfA, rfB));
+    return c->value();
+}
+
+} // namespace mc
