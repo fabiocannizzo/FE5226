@@ -51,79 +51,58 @@ int main() {
     // ------------------------------------------------------------------------
     // 1. Observed Historical Events (Fixing Events up to Today)
     // ------------------------------------------------------------------------
-    std::vector<Events> events = {
-        Events("GBP.USD", -90, 1.25), // Historical fixing at t = -90d
-        Events("GBP.USD",   0, 1.28)  // Spot fixing at t = today (0d)
+    Events events = {
+        makeFixingEvent("GBP.USD", -90, 1.25), // Historical fixing at t = -90d
+        makeFixingEvent("GBP.USD",   0, 1.28)  // Spot fixing at t = today (0d)
     };
 
     // ------------------------------------------------------------------------
     // 2. Payoffs (Pure Contract Specification & Pricer Factory)
-    //    Notice: IPayoff has no fixingDates() and no eval()!
     // ------------------------------------------------------------------------
-    // Trade 0: 6M Vanilla Call on EUR.USD under BS Closed-Form (Brownian state variable)
-    auto vanilla_call_closed = std::make_shared<PayoffVanilla>(
+    // Trade 0: 6M Vanilla Call on EUR.USD
+    auto vanilla_call = std::make_shared<PayoffVanilla>(
         "EUR.USD", /*notional*/ 1000000.0, /*strike*/ 1.10, /*Call*/ +1,
-        /*expiry*/ 180, /*settle*/ 180, "USD", "BS_CLOSED");
+        /*expiry*/ 180, /*settle*/ 180, "USD");
 
-    // Trade 1: 6M Vanilla Call on EUR.USD under BS Euler (Spot state variable + monthly step injection)
-    auto vanilla_call_euler = std::make_shared<PayoffVanilla>(
-        "EUR.USD", /*notional*/ 1000000.0, /*strike*/ 1.10, /*Call*/ +1,
-        /*expiry*/ 180, /*settle*/ 180, "USD", "BS_EULER");
-
-    // Trade 2: Seasoned Asian Call on GBP.USD under BS Closed-Form
+    // Trade 1: Seasoned Asian Call on GBP.USD
     // Schedule: -90d (past), 0d (past), 90d (future), 180d (future)
     std::vector<Date> asian_sched = { -90, 0, 90, 180 };
-    auto asian_call_closed = std::make_shared<PayoffAsian>(
+    auto asian_call = std::make_shared<PayoffAsian>(
         "GBP.USD", /*notional*/ 1000000.0, /*strike*/ 1.26, /*Call*/ +1,
-        asian_sched, /*settle*/ 180, "USD", "BS_CLOSED");
+        asian_sched, /*settle*/ 180, "USD");
 
-    // Trade 3: Seasoned Asian Call on GBP.USD under BS Euler
-    auto asian_call_euler = std::make_shared<PayoffAsian>(
-        "GBP.USD", /*notional*/ 1000000.0, /*strike*/ 1.26, /*Call*/ +1,
-        asian_sched, /*settle*/ 180, "USD", "BS_EULER");
-
-    // Trade 4: Worst-Of Call on EUR.USD and GBP.USD
+    // Trade 2: Worst-Of Call on EUR.USD and GBP.USD
     auto worst_of_call = std::make_shared<PayoffWorstOfCall>(
         "EUR.USD", "GBP.USD", /*spot0*/ 1.10, 1.28,
         /*notional*/ 1000000.0, /*strike*/ 1.00,
-        /*expiry*/ 180, /*settle*/ 180, "USD", "BS_CLOSED", "BS_CLOSED");
+        /*expiry*/ 180, /*settle*/ 180, "USD");
 
-    // ------------------------------------------------------------------------
-    // 3. Factory Generation: payoff->getPricer(events)
-    // ------------------------------------------------------------------------
-    std::vector<pmcpricer_t> pricers = {
-        vanilla_call_closed->getPricer(events), // Pricer 0: Vanilla Call (BS Closed)
-        vanilla_call_euler->getPricer(events),  // Pricer 1: Vanilla Call (BS Euler)
-        asian_call_closed->getPricer(events),   // Pricer 2: Asian Call (BS Closed)
-        asian_call_euler->getPricer(events),    // Pricer 3: Asian Call (BS Euler)
-        worst_of_call->getPricer(events)        // Pricer 4: Worst-Of Call (BS Closed)
+    // Portfolio of payoffs passed to the pricing function
+    std::vector<ppayoff_t> portfolio = {
+        vanilla_call,
+        asian_call,
+        worst_of_call
     };
 
-    std::cout << "[Pricer Lifecycling via getPricer(events)]\n";
-    std::cout << "  Asian Call contract schedule      : { -90, 0, 90, 180 }\n";
-    std::cout << "  Asian Call requiredDates() (future): { ";
-    for (size_t i = 0; i < pricers[2]->requiredDates().size(); ++i) {
-        std::cout << pricers[2]->requiredDates()[i]
-                  << (i + 1 < pricers[2]->requiredDates().size() ? ", " : " }\n\n");
+    // Inspect IPayoff contract query methods
+    std::cout << "[IPayoff Contract Query Methods with Events]\n";
+    std::cout << "  Asian Call observationDates() : { ";
+    auto obs = asian_call->observationDates(events);
+    for (size_t i = 0; i < obs.size(); ++i) {
+        std::cout << obs[i] << (i + 1 < obs.size() ? ", " : " }\n");
     }
+    std::cout << "  Asian Call maturityDate()     : " << asian_call->maturityDate(events) << "\n";
+    std::cout << "  Asian Call settlementDates()  : { " << asian_call->settlementDates(events)[0] << " }\n";
+    std::cout << "  Asian Call cashflow ccy       : { " << asian_call->getCashFlowCurrencies(events)[0] << " }\n\n";
 
     // ------------------------------------------------------------------------
-    // 4. MCEngine Master Setup
+    // 3. Configurations
     // ------------------------------------------------------------------------
-    MCEngine engine(pricers, today, n_paths, /*seed*/ 42, /*antithetic*/ true);
-
-    std::cout << "[Engine Initial Setup (Before Model Date Injection)]\n";
-    std::cout << "  Pricer Required Dates: { ";
-    for (size_t i = 0; i < engine.masterDates().size(); ++i) {
-        std::cout << engine.masterDates()[i] << (i + 1 < engine.masterDates().size() ? ", " : " }\n");
-    }
-    std::cout << "  Models Needed        : { ";
-    for (size_t i = 0; i < engine.masterModels().size(); ++i) {
-        std::cout << engine.masterModels()[i] << (i + 1 < engine.masterModels().size() ? ", " : " }\n\n");
-    }
+    PricerConfig config_closed{ "BS_CLOSED" };
+    PricerConfig config_euler{ "BS_EULER" };
 
     // ------------------------------------------------------------------------
-    // 5. Prepopulated Market Data Server
+    // 4. Prepopulated Market Data Server
     // ------------------------------------------------------------------------
     const double r_usd     = 0.04;
     const double mu_eurusd = 0.015;
@@ -148,39 +127,37 @@ int main() {
     mds.discount_curves["USD"]        = &usd_curve;
 
     // ------------------------------------------------------------------------
-    // 6. Valuation: Engine Queries Model Factory & Injects Dates
+    // 5. Valuation: Pricing function taking a vector of payoffs directly!
     // ------------------------------------------------------------------------
-    std::vector<double> pvs = engine.price(mds);
-
-    std::cout << "[Timeline After Model Date Injection (Euler Injected <= 30d Steps)]\n";
-    std::cout << "  Merged Timeline (" << engine.masterDates().size() << " dates): { ";
-    for (size_t i = 0; i < engine.masterDates().size(); ++i) {
-        std::cout << engine.masterDates()[i] << (i + 1 < engine.masterDates().size() ? ", " : " }\n\n");
-    }
+    std::cout << "[Pricing Function taking a Vector of Payoffs]\n";
+    auto pvs_closed = price(portfolio, events, config_closed, mds, today, n_paths, /*seed*/ 42, /*antithetic*/ true);
+    auto pvs_euler  = price(portfolio, events, config_euler,  mds, today, n_paths, /*seed*/ 42, /*antithetic*/ true);
 
     double bs_exact = blackScholesPrice(
         1.10, 1.10, r_usd, mu_eurusd, vol_eur, 180.0 / 365.0, +1, 1000000.0);
 
     std::cout << "[Pricing Results (N = " << n_paths << " paths)]\n";
-    std::cout << "  Pricer 0: EUR Vanilla Call (BS Closed, W state) : " << std::setw(12) << pvs[0]
-              << " USD  (Analytical BS: " << bs_exact << ", diff: " << std::abs(pvs[0] - bs_exact) << ")\n";
-    std::cout << "  Pricer 1: EUR Vanilla Call (BS Euler,  S state) : " << std::setw(12) << pvs[1]
-              << " USD  (Euler vs Closed diff: " << std::abs(pvs[1] - pvs[0]) << ")\n";
-    std::cout << "  Pricer 2: GBP Asian Call   (BS Closed, W state) : " << std::setw(12) << pvs[2] << " USD\n";
-    std::cout << "  Pricer 3: GBP Asian Call   (BS Euler,  S state) : " << std::setw(12) << pvs[3]
-              << " USD  (Euler vs Closed diff: " << std::abs(pvs[3] - pvs[2]) << ")\n";
-    std::cout << "  Pricer 4: EUR/GBP Worst-Of Call (BS Closed)     : " << std::setw(12) << pvs[4] << " USD\n\n";
+    std::cout << "  Trade 0: EUR Vanilla Call (BS Closed) : " << std::setw(12) << pvs_closed[0]
+              << " USD  (Analytical BS: " << bs_exact << ", diff: " << std::abs(pvs_closed[0] - bs_exact) << ")\n";
+    std::cout << "  Trade 0: EUR Vanilla Call (BS Euler)  : " << std::setw(12) << pvs_euler[0]
+              << " USD  (Euler vs Closed diff: " << std::abs(pvs_euler[0] - pvs_closed[0]) << ")\n";
+    std::cout << "  Trade 1: GBP Asian Call   (BS Closed) : " << std::setw(12) << pvs_closed[1] << " USD\n";
+    std::cout << "  Trade 1: GBP Asian Call   (BS Euler)  : " << std::setw(12) << pvs_euler[1]
+              << " USD  (Euler vs Closed diff: " << std::abs(pvs_euler[1] - pvs_closed[1]) << ")\n";
+    std::cout << "  Trade 2: EUR/GBP Worst-Of (BS Closed) : " << std::setw(12) << pvs_closed[2] << " USD\n";
+    std::cout << "  Trade 2: EUR/GBP Worst-Of (BS Euler)  : " << std::setw(12) << pvs_euler[2]
+              << " USD  (Euler vs Closed diff: " << std::abs(pvs_euler[2] - pvs_closed[2]) << ")\n\n";
 
     // ------------------------------------------------------------------------
-    // 7. Common Random Numbers (CRN) Finite-Difference Delta on EUR.USD
+    // 6. Common Random Numbers (CRN) Finite-Difference Delta on EUR.USD
     // ------------------------------------------------------------------------
     const double S0   = 1.10;
     const double bump = 1e-4;
 
     mds.spots["EUR.USD"] = S0 + bump;
-    auto pv_up           = engine.price(mds);
+    auto pv_up           = price(portfolio, events, config_closed, mds, today, n_paths, 42, true);
     mds.spots["EUR.USD"] = S0 - bump;
-    auto pv_dn           = engine.price(mds);
+    auto pv_dn           = price(portfolio, events, config_closed, mds, today, n_paths, 42, true);
     mds.spots["EUR.USD"] = S0;
 
     double mc_delta = (pv_up[0] - pv_dn[0]) / (2.0 * bump);

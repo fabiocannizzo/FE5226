@@ -20,6 +20,28 @@ MCEngine::MCEngine(std::vector<pmcpricer_t> pricers,
     buildMasterTimelineAndModels();
 }
 
+MCEngine::MCEngine(const std::vector<ppayoff_t>& payoffs,
+                   const Events&                 events,
+                   const PricerConfig&           config,
+                   Date                          today,
+                   size_t                        n_paths,
+                   uint64_t                      seed,
+                   bool                          antithetic)
+    : m_today(today)
+    , m_n_paths(n_paths)
+    , m_seed(seed)
+    , m_antithetic(antithetic) {
+    MYASSERT(!payoffs.empty(), "MCEngine requires at least one payoff");
+    MYASSERT(m_n_paths > 0, "Number of Monte Carlo paths must be positive");
+    m_pricers.reserve(payoffs.size());
+    for (const auto& p : payoffs) {
+        if (p) {
+            m_pricers.push_back(p->getPricer(events, config));
+        }
+    }
+    buildMasterTimelineAndModels();
+}
+
 void MCEngine::buildMasterTimelineAndModels() {
     m_dates.clear();
     m_models.clear();
@@ -282,6 +304,14 @@ std::vector<double> MCEngine::price(const std::map<std::string, IMarketObject*>&
         pv_results[pr] = pv_sum[pr] / static_cast<double>(m_n_paths);
     }
     return pv_results;
+}
+
+std::vector<double> MCEngine::price(const std::vector<ppayoff_t>& payoffs,
+                                    const Events&                 events,
+                                    const PricerConfig&           config,
+                                    const MarketDataServer&       mkt) const {
+    MCEngine engine(payoffs, events, config, m_today, m_n_paths, m_seed, m_antithetic);
+    return engine.price(mkt);
 }
 
 } // namespace mc

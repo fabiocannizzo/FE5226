@@ -12,15 +12,15 @@ namespace mc {
 // ----------------------------------------------------------------------------
 class VanillaMCPricer : public IPricer {
 public:
-    VanillaMCPricer(std::string                pair,
-                    double                     notional,
-                    double                     strike,
-                    int                        call_put,
-                    Date                       expiry,
-                    Date                       settle,
-                    std::string                ccy,
-                    std::string                model_name,
-                    const std::vector<Events>& events)
+    VanillaMCPricer(std::string   pair,
+                    double        notional,
+                    double        strike,
+                    int           call_put,
+                    Date          expiry,
+                    Date          settle,
+                    std::string   ccy,
+                    std::string   model_name,
+                    const Events& events)
         : m_pair(std::move(pair))
         , m_notional(notional)
         , m_strike(strike)
@@ -93,15 +93,15 @@ private:
 // ----------------------------------------------------------------------------
 class AsianMCPricer : public IPricer {
 public:
-    AsianMCPricer(std::string                pair,
-                  double                     notional,
-                  double                     strike,
-                  int                        call_put,
-                  std::vector<Date>          fix_dates,
-                  Date                       settle,
-                  std::string                ccy,
-                  std::string                model_name,
-                  const std::vector<Events>& events)
+    AsianMCPricer(std::string       pair,
+                  double            notional,
+                  double            strike,
+                  int               call_put,
+                  std::vector<Date> fix_dates,
+                  Date              settle,
+                  std::string       ccy,
+                  std::string       model_name,
+                  const Events&     events)
         : m_pair(std::move(pair))
         , m_notional(notional)
         , m_strike(strike)
@@ -205,18 +205,18 @@ private:
 // ----------------------------------------------------------------------------
 class WorstOfMCPricer : public IPricer {
 public:
-    WorstOfMCPricer(std::string                pair0,
-                    std::string                pair1,
-                    double                     spot0_0,
-                    double                     spot0_1,
-                    double                     notional,
-                    double                     strike,
-                    Date                       expiry,
-                    Date                       settle,
-                    std::string                ccy,
-                    std::string                model0,
-                    std::string                model1,
-                    const std::vector<Events>& events)
+    WorstOfMCPricer(std::string   pair0,
+                    std::string   pair1,
+                    double        spot0_0,
+                    double        spot0_1,
+                    double        notional,
+                    double        strike,
+                    Date          expiry,
+                    Date          settle,
+                    std::string   ccy,
+                    std::string   model0,
+                    std::string   model1,
+                    const Events& events)
         : m_pairs{ std::move(pair0), std::move(pair1) }
         , m_spot0{ spot0_0, spot0_1 }
         , m_notional(notional)

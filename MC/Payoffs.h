@@ -22,7 +22,7 @@ public:
                   Date        expiry,
                   Date        settle,
                   std::string ccy          = "USD",
-                  std::string model_family = "BS_CLOSED")
+                  std::string model_family = "")
         : m_pair(std::move(pair))
         , m_pay_ccy(std::move(ccy))
         , m_model_family(std::move(model_family))
@@ -32,14 +32,32 @@ public:
         , m_expiry(expiry)
         , m_settle(settle) {}
 
-    std::vector<std::string> underlyingNames() const override { return { m_pair }; }
-    Date                     settlementDate() const override { return m_settle; }
-    std::string              payoffCurrency() const override { return m_pay_ccy; }
-
-    std::shared_ptr<IPricer> getPricer(const std::vector<Events>& events) const override {
+    std::shared_ptr<IPricer> getPricer(const Events&       events,
+                                       const PricerConfig& config = PricerConfig{}) const override {
+        std::string family = !m_model_family.empty() ? m_model_family : config.default_model;
+        auto        it     = config.model_overrides.find(m_pair);
+        if (it != config.model_overrides.end()) {
+            family = it->second;
+        }
         return std::make_shared<VanillaMCPricer>(
             m_pair, m_notional, m_strike, m_omega, m_expiry, m_settle,
-            m_pay_ccy, m_model_family + "." + m_pair, events);
+            m_pay_ccy, family + "." + m_pair, events);
+    }
+
+    std::vector<std::string> getCashFlowCurrencies(const Events& /*events*/) const override {
+        return { m_pay_ccy };
+    }
+
+    std::vector<Date> observationDates(const Events& /*events*/) const override {
+        return { m_expiry };
+    }
+
+    Date maturityDate(const Events& /*events*/) const override {
+        return m_expiry;
+    }
+
+    std::vector<Date> settlementDates(const Events& /*events*/) const override {
+        return { m_settle };
     }
 
 private:
@@ -67,7 +85,7 @@ public:
                 std::vector<Date> fix_dates,
                 Date              settle,
                 std::string       ccy          = "USD",
-                std::string       model_family = "BS_CLOSED")
+                std::string       model_family = "")
         : m_pair(std::move(pair))
         , m_pay_ccy(std::move(ccy))
         , m_model_family(std::move(model_family))
@@ -79,14 +97,32 @@ public:
         MYASSERT(!m_fix_dates.empty(), "Asian option requires at least one fixing date");
     }
 
-    std::vector<std::string> underlyingNames() const override { return { m_pair }; }
-    Date                     settlementDate() const override { return m_settle; }
-    std::string              payoffCurrency() const override { return m_pay_ccy; }
-
-    std::shared_ptr<IPricer> getPricer(const std::vector<Events>& events) const override {
+    std::shared_ptr<IPricer> getPricer(const Events&       events,
+                                       const PricerConfig& config = PricerConfig{}) const override {
+        std::string family = !m_model_family.empty() ? m_model_family : config.default_model;
+        auto        it     = config.model_overrides.find(m_pair);
+        if (it != config.model_overrides.end()) {
+            family = it->second;
+        }
         return std::make_shared<AsianMCPricer>(
             m_pair, m_notional, m_strike, m_omega, m_fix_dates, m_settle,
-            m_pay_ccy, m_model_family + "." + m_pair, events);
+            m_pay_ccy, family + "." + m_pair, events);
+    }
+
+    std::vector<std::string> getCashFlowCurrencies(const Events& /*events*/) const override {
+        return { m_pay_ccy };
+    }
+
+    std::vector<Date> observationDates(const Events& /*events*/) const override {
+        return m_fix_dates;
+    }
+
+    Date maturityDate(const Events& /*events*/) const override {
+        return m_fix_dates.empty() ? 0 : m_fix_dates.back();
+    }
+
+    std::vector<Date> settlementDates(const Events& /*events*/) const override {
+        return { m_settle };
     }
 
 private:
@@ -114,8 +150,8 @@ public:
                       Date        expiry,
                       Date        settle,
                       std::string ccy    = "USD",
-                      std::string model0 = "BS_CLOSED",
-                      std::string model1 = "BS_CLOSED")
+                      std::string model0 = "",
+                      std::string model1 = "")
         : m_pairs{ std::move(pair0), std::move(pair1) }
         , m_spot0{ spot0_0, spot0_1 }
         , m_pay_ccy(std::move(ccy))
@@ -125,19 +161,40 @@ public:
         , m_expiry(expiry)
         , m_settle(settle) {}
 
-    std::vector<std::string> underlyingNames() const override {
-        return { m_pairs[0], m_pairs[1] };
-    }
-    Date        settlementDate() const override { return m_settle; }
-    std::string payoffCurrency() const override { return m_pay_ccy; }
-
-    std::shared_ptr<IPricer> getPricer(const std::vector<Events>& events) const override {
+    std::shared_ptr<IPricer> getPricer(const Events&       events,
+                                       const PricerConfig& config = PricerConfig{}) const override {
+        std::string fam0 = !m_models[0].empty() ? m_models[0] : config.default_model;
+        auto        it0  = config.model_overrides.find(m_pairs[0]);
+        if (it0 != config.model_overrides.end()) {
+            fam0 = it0->second;
+        }
+        std::string fam1 = !m_models[1].empty() ? m_models[1] : config.default_model;
+        auto        it1  = config.model_overrides.find(m_pairs[1]);
+        if (it1 != config.model_overrides.end()) {
+            fam1 = it1->second;
+        }
         return std::make_shared<WorstOfMCPricer>(
             m_pairs[0], m_pairs[1], m_spot0[0], m_spot0[1], m_notional, m_strike,
             m_expiry, m_settle, m_pay_ccy,
-            m_models[0] + "." + m_pairs[0],
-            m_models[1] + "." + m_pairs[1],
+            fam0 + "." + m_pairs[0],
+            fam1 + "." + m_pairs[1],
             events);
+    }
+
+    std::vector<std::string> getCashFlowCurrencies(const Events& /*events*/) const override {
+        return { m_pay_ccy };
+    }
+
+    std::vector<Date> observationDates(const Events& /*events*/) const override {
+        return { m_expiry };
+    }
+
+    Date maturityDate(const Events& /*events*/) const override {
+        return m_expiry;
+    }
+
+    std::vector<Date> settlementDates(const Events& /*events*/) const override {
+        return { m_settle };
     }
 
 private:
