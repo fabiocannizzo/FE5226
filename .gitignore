@@ -1,3 +1,12 @@
 *.o
 *.exe
 
+# Visual Studio (the whole project folder of the MC example, with its temporary and output folders)
+.vs/
+MC/MC/
+enc_temp_folder/
+x64/
+
+# build output
+bin/
+bin-dbg/
