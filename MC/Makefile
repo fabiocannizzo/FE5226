@@ -37,7 +37,11 @@ endif
 $(info EXTENSIONS:  $(OBJ) $(EXE) $(DLL) $(LIB))
 
 
-CPPFILES := $(patsubst ./%,%,$(shell find . -name "*.cpp"))
+# Sources are searched recursively, except in the Visual Studio project folder (MC/, which also
+# contains temporary copies of the sources, e.g. MC/enc_temp_folder/) and in the build output folders
+EXCLUDE := -not -path "./MC/*" -not -path "./bin/*" -not -path "./bin-dbg/*"
+
+CPPFILES := $(patsubst ./%,%,$(shell find . -name "*.cpp" $(EXCLUDE)))
 $(info CPP:     $(CPPFILES))
 
 DEPFILES := $(patsubst %.cpp,$(BINDIR)/%.d,$(CPPFILES))
@@ -48,7 +52,7 @@ OBJFILES := $(patsubst %.cpp,$(BINDIR)/%$(OBJ),$(CPPFILES))
 $(info OBJFILES:     $(OBJFILES))
 
 
-HEADER := $(patsubst ./%,%,$(shell find . -name "*.h"))
+HEADER := $(patsubst ./%,%,$(shell find . -name "*.h" $(EXCLUDE)))
 $(info HEADER:     $(HEADER))
 
 
